@@ -19,6 +19,34 @@ app.get('/api/user', (req, res) => {
   });
 });
 
+// Mock balance sheet data
+const balanceSheetData = {
+  totalAssets: 15450,
+  totalLiabilities: 3200,
+  netValue: 12250,
+  breakdown: [
+    { category: 'Cash in Hand', amount: 4500, type: 'Asset' },
+    { category: 'Bank Balance', amount: 10000, type: 'Asset' },
+    { category: 'Inventory', amount: 950, type: 'Asset' },
+    { category: 'Accounts Payable', amount: 2200, type: 'Liability' },
+    { category: 'Short-term Loan', amount: 1000, type: 'Liability' }
+  ],
+  ledgerSummary: [
+    { category: 'Sales', income: 9700, expense: 0, net: 9700 },
+    { category: 'Utilities', income: 0, expense: 200, net: -200 },
+    { category: 'Staff Salaries', income: 0, expense: 2500, net: -2500 },
+    { category: 'Rent', income: 0, expense: 500, net: -500 }
+  ]
+};
+
+app.get('/api/balance-sheet', (req, res) => {
+  res.json({
+    success: true,
+    data: balanceSheetData,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // For local development
 if (process.env.NODE_ENV !== 'production') {
   const PORT = 3000;
