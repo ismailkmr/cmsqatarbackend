@@ -47,13 +47,11 @@ app.get('/api/balance-sheet', (req, res) => {
   });
 });
 
-// For local development
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = 3000;
-  app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-  });
-}
+// For local development and Render
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
 
 // Export for Vercel's serverless handler
 module.exports = app;
