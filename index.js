@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 app.get('/api/user', (req, res) => {
   res.send({
     id: 1,
-    name: 'Gemini User',
+    name: 'Gemini User!!!!!!!!!!!!!!!!!!!!!!!',
     status: 'Active',
     timestamp: new Date().toISOString()
   });
@@ -41,36 +41,36 @@ const balanceSheetData = {
 
 // Mock employee data
 let employees = [
-  { 
-    id: 1, 
-    name: 'Alice Smith', 
-    position: 'Cashier', 
-    status: 'Active', 
-    idExpiry: '2027-05-10', 
+  {
+    id: 1,
+    name: 'Alice Smith',
+    position: 'Cashier',
+    status: 'Active',
+    idExpiry: '2027-05-10',
     joinDate: '2023-01-15',
     qatarId: '29012345678',
     visaExpiry: '2026-10-20',
     nationality: 'Indian',
     passportNumber: 'L1234567'
   },
-  { 
-    id: 2, 
-    name: 'Bob Johnson', 
-    position: 'Stock Clerk', 
-    status: 'Active', 
-    idExpiry: '2024-02-15', 
+  {
+    id: 2,
+    name: 'Bob Johnson',
+    position: 'Stock Clerk',
+    status: 'Active',
+    idExpiry: '2024-02-15',
     joinDate: '2022-11-01',
     qatarId: '28012345679',
     visaExpiry: '2024-03-15',
     nationality: 'Nepalese',
     passportNumber: 'M7654321'
   },
-  { 
-    id: 3, 
-    name: 'Charlie Davis', 
-    position: 'Manager', 
-    status: 'Inactive', 
-    idExpiry: '2026-08-20', 
+  {
+    id: 3,
+    name: 'Charlie Davis',
+    position: 'Manager',
+    status: 'Inactive',
+    idExpiry: '2026-08-20',
     joinDate: '2021-06-20',
     qatarId: '27012345680',
     visaExpiry: '2026-12-20',
@@ -99,7 +99,7 @@ app.get('/api/employees', (req, res) => {
 // POST new employee
 app.post('/api/employees', (req, res) => {
   const { name, position, status, joinDate, idExpiry, password, qatarId, visaExpiry, nationality, passportNumber } = req.body;
-  
+
   if (!name || !position) {
     return res.status(400).json({ success: false, message: 'Name and Position are required' });
   }
@@ -111,7 +111,7 @@ app.post('/api/employees', (req, res) => {
     status: status || 'Active',
     joinDate: joinDate || new Date().toISOString().split('T')[0],
     idExpiry,
-    password, 
+    password,
     qatarId: qatarId || 'N/A',
     visaExpiry: visaExpiry || idExpiry,
     nationality: nationality || 'N/A',
@@ -120,7 +120,7 @@ app.post('/api/employees', (req, res) => {
   };
 
   employees.push(newEmployee);
-  
+
   res.status(201).json({
     success: true,
     message: 'Employee created successfully',
