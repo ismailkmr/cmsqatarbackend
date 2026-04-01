@@ -13,8 +13,8 @@ app.get('/', (req, res) => {
 app.get('/api/user', (req, res) => {
   res.send({
     id: 1,
-    name: 'Gemini User!',
-    
+    name: 'Gemini User#$%^&*&^%$!',
+
     
     status: 'Active',
     timestamp: new Date().toISOString()
