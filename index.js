@@ -11,7 +11,7 @@ app.get('/', (req, res) => {
 
 // A sample API route with data
 app.get('/api/user', (req, res) => {
-  res.json({
+  res.send({
     id: 1,
     name: 'Gemini User',
     status: 'Active',
