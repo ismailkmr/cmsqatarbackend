@@ -130,9 +130,18 @@ app.use(express.json());
 app.use(cors());
 
 // Configure Multer and static serving for uploads
-const uploadDir = path.join(__dirname, 'uploads');
+// On Vercel, we must use /tmp for uploads as the rest of the filesystem is read-only
+const isVercel = process.env.VERCEL === '1' || !!process.env.NOW_REGION;
+const uploadDir = isVercel ? '/tmp' : path.join(__dirname, 'uploads');
+
+console.log(`Using upload directory: ${uploadDir} (isVercel: ${isVercel})`);
+
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+  try {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  } catch (err) {
+    console.error(`Failed to create upload directory ${uploadDir}:`, err);
+  }
 }
 app.use('/uploads', express.static(uploadDir));
 
@@ -143,20 +152,40 @@ const storage = multer.diskStorage({
     cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
-const upload = multer({ storage });
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
 
 // Upload endpoint
-app.post('/api/upload', upload.single('bill'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ success: false, message: 'No file uploaded' });
-  }
-  const PORT = process.env.PORT || 3000;
-  const fileUrl = `http://localhost:${PORT}/uploads/${req.file.filename}`;
-  res.json({
-    success: true,
-    message: 'File uploaded successfully',
-    url: fileUrl,
-    filename: req.file.filename
+app.post('/api/upload', (req, res) => {
+  upload.single('bill')(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      console.error('Multer error:', err);
+      return res.status(400).json({ success: false, message: `Upload error: ${err.message}` });
+    } else if (err) {
+      
+      console.error('Unknown upload error:', err);
+      return res.status(500).json({ success: false, message: `Server error during upload: ${err.message}` });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+
+    // Dynamic URL generation for both local and production
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+    const host = req.get('host');
+    const fileUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
+
+    console.log(`File uploaded successfully: ${req.file.filename} -> ${fileUrl}`);
+
+    res.json({
+      success: true,
+      message: 'File uploaded successfully',
+      url: fileUrl,
+      filename: req.file.filename
+    });
   });
 });
 
