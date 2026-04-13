@@ -145,6 +145,24 @@ if (!fs.existsSync(uploadDir)) {
 }
 app.use('/uploads', express.static(uploadDir));
 
+// Authentication Middleware
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'No token provided' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ success: false, message: 'Invalid or expired token' });
+    }
+    req.user = decoded; // Store decoded user info (id, email, role)
+    next();
+  });
+};
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
@@ -163,23 +181,18 @@ app.post('/api/upload', (req, res) => {
     if (err instanceof multer.MulterError) {
       console.error('Multer error:', err);
       return res.status(400).json({ success: false, message: `Upload error: ${err.message}` });
-    } else if (err) {
-      
+    } else if (err) {      
       console.error('Unknown upload error:', err);
       return res.status(500).json({ success: false, message: `Server error during upload: ${err.message}` });
     }
-
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
-
     // Dynamic URL generation for both local and production
     const protocol = req.headers['x-forwarded-proto'] || req.protocol;
     const host = req.get('host');
     const fileUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
-
     console.log(`File uploaded successfully: ${req.file.filename} -> ${fileUrl}`);
-
     res.json({
       success: true,
       message: 'File uploaded successfully',
@@ -265,6 +278,45 @@ app.post('/api/register', async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
+});
+
+// Get logged-in user data
+app.get('/api/auth/me', authenticateToken, (req, res) => {
+  const query = 'SELECT id, email, name, role FROM users WHERE id = ?';
+  connection.query(query, [req.user.id], (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      user: results[0]
+    });
+  });
+});
+
+// GET all users (Admin only)
+app.get('/api/users', authenticateToken, (req, res) => {
+  if (req.user.role !== 'Admin') {
+    return res.status(403).json({ success: false, message: 'Access denied. Admins only.' });
+  }
+
+  const query = 'SELECT id, email, name, role FROM users';
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching users:', err);
+      return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+    res.json({
+      success: true,
+      data: results
+    });
+  });
 });
 
 // A sample API route with data
