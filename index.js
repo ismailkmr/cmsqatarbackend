@@ -10,8 +10,9 @@ const fs = require('fs');
 const JWT_SECRET = 'your-very-secret-key-123'; // In production, use environment variables
 const connection = mysql.createConnection({
   host: 'gateway01.ap-southeast-1.prod.aws.tidbcloud.com',
+  port: 4000,
   user: 'gVGNtoZeCxHwRYy.root',
-  password: 'LjMczNp7z3MlDFRo', // or your password
+  password: 'mz38iaMGxAq6PA7t',
   database: 'test',
   ssl: {
     minVersion: 'TLSv1.2',
